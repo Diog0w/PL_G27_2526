@@ -12,7 +12,6 @@ literals = (
     "*",
     "/",
     "=",
-    ":",
 )
 
 
@@ -237,6 +236,7 @@ def t_INTEGER(t):
     r"\d+"
     # Em free-form, aceitamos labels numericos no inicio da linha, por exemplo:
     # 10 CONTINUE
+    # Simplificacao do projeto: nao limitamos os labels aos 5 digitos do Fortran 77.
     if getattr(t.lexer, "at_line_start", False):
         remainder = t.lexer.lexdata[t.lexer.lexpos :]
         if remainder and remainder[0] in " \t":
@@ -249,11 +249,14 @@ def t_ID(t):
     return _emit_token(t)
 
 
+# Suportamos apenas comentarios free-form com "!"; os comentarios de formato
+# fixo do Fortran 77, como C ou * na primeira coluna, ficam fora deste subset.
 t_ignore_COMMENT = r"![^\n]*"
 
 
 def t_NEWLINE(t):
     r"\n+"
+    # Neste subset assumimos uma instrucao por linha, sem continuacao com &.
     # Cada quebra de linha reposiciona o lexer para um novo "inicio de linha".
     t.lexer.lineno += len(t.value)
     t.lexer.at_line_start = True

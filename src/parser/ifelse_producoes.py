@@ -8,6 +8,8 @@ def p_if_statement(p):
     if_statement : IF "(" expression ")" THEN terminator statement_items else_part ENDIF terminator
     """
     # Aqui tratamos o IF em bloco, nao a forma aritmetica antiga.
+    # Neste subset, o fecho do bloco e escrito como ENDIF; a forma END IF
+    # pode ser adicionada como uma regra sintatica separada.
     p[0] = IfStatement(condition=p[3], then_body=p[7], else_body=p[8])
 
 
