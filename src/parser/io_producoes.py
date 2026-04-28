@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from .nodes import GotoStatement, PrintStatement, ReadStatement
-
 
 def p_print_statement(p):
     """
     print_statement : PRINT "*" "," print_items_opt
     """
     # Suportamos a forma PRINT *, expr1, expr2, ...
-    p[0] = PrintStatement(items=p[4])
+    p[0] = ("print", p[4])
 
 
 def p_print_items_opt(p):
@@ -24,7 +22,7 @@ def p_read_statement(p):
     read_statement : READ "*" "," reference_list
     """
     # READ escreve nas referencias recebidas.
-    p[0] = ReadStatement(items=p[4])
+    p[0] = ("read", p[4])
 
 
 def p_reference_list_single(p):
@@ -46,4 +44,4 @@ def p_goto_statement(p):
     goto_statement : GOTO label_number
     """
     # GOTO guarda apenas o label de destino.
-    p[0] = GotoStatement(target_label=p[2])
+    p[0] = ("goto", p[2])

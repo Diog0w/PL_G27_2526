@@ -28,6 +28,7 @@ def eof_location() -> tuple[int, int]:
 
 
 def attach_label(statement, label: int | None):
-    # Helper pequeno para tornar as producoes com labels mais legiveis.
-    statement.label = label
-    return statement
+    # A AST usa tuplos no estilo dos exemplos das aulas. As producoes de
+    # statements criam primeiro o no sem label e este helper insere o label
+    # logo a seguir ao tipo do no: ("assignment", label, ...).
+    return (statement[0], label, *statement[1:])

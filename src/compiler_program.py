@@ -30,10 +30,10 @@ def main() -> int:
             print(token)
         return 0
 
-    # Se o parse terminar sem excecoes, o ficheiro esta sintaticamente valido
-    # dentro do subconjunto de Fortran suportado pelo projeto.
+    # Se a analise terminar sem excecoes, o ficheiro esta sintatica e
+    # semanticamente valido dentro do subconjunto suportado pelo projeto.
     parse_source(source)
-    print(f"Parser OK: {args.path}")
+    print(f"Analise OK: {args.path}")
     return 0
 
 

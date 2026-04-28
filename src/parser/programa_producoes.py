@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from .nodes import ContinueStatement, MainProgram, ProgramFile, ReturnStatement, StopStatement
 from .shared import attach_label
 
 
@@ -11,7 +10,7 @@ def p_program_file(p):
     # Estrutura global do ficheiro: programa principal + subprogramas.
     # Os NEWLINE finais do ficheiro sao removidos antes do parse para evitar
     # ambiguidade com as linhas em branco entre subprogramas.
-    p[0] = ProgramFile(main_program=p[2], subprograms=p[3])
+    p[0] = ("program_file", p[2], p[3])
 
 
 def p_opt_newlines(p):
@@ -59,7 +58,7 @@ def p_main_program(p):
     main_program : PROGRAM ID terminator statement_items END
     """
     # O nome fica normalizado em maiusculas, como o resto dos identificadores.
-    p[0] = MainProgram(name=p[2].upper(), statements=p[4])
+    p[0] = ("main_program", p[2].upper(), p[4])
 
 
 def p_statement_items_list(p):
@@ -105,9 +104,9 @@ def p_statement_labeled_line(p):
     # RETURN e STOP nao trazem dados extra, por isso criamos os nos aqui.
     token_type = p.slice[2].type
     if token_type == "RETURN":
-        statement = ReturnStatement()
+        statement = ("return",)
     elif token_type == "STOP":
-        statement = StopStatement()
+        statement = ("stop",)
     else:
         statement = p[2]
     # Se a linha tiver label, ele fica associado ao statement final.
@@ -119,7 +118,7 @@ def p_statement_continue(p):
     statement : CONTINUE terminator
     """
     # CONTINUE costuma surgir como alvo do fecho de um DO com label.
-    p[0] = ContinueStatement()
+    p[0] = ("continue", None)
 
 
 def p_statement_if(p):

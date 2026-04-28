@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from .errors import ParserError
-from .nodes import DoStatement
 from .shared import token_column
 
 
@@ -20,14 +19,7 @@ def p_do_statement(p):
             token_column(end_label_token),
         )
 
-    p[0] = DoStatement(
-        target_label=p[2],
-        variable=p[3].upper(),
-        start=p[5],
-        end=p[7],
-        step=p[8],
-        body=p[10],
-    )
+    p[0] = ("do", p[2], p[3].upper(), p[5], p[7], p[8], p[10])
 
 
 def p_do_step_opt(p):

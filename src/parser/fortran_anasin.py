@@ -1,7 +1,8 @@
 import ply.yacc as yacc
 
-from ..lexer.fortran_analex import tokenize_source, tokens
+from ..lexer.fortran_analex import build_lexer, tokens
 from .errors import ParserError
+from .semantic import validate_program
 from .shared import eof_location, set_current_source, token_column
 
 # Regra inicial da gramatica: o ficheiro inteiro deve encaixar aqui.
@@ -17,26 +18,6 @@ from .funcoes_producoes import *  # noqa: F401,F403
 from .ifelse_producoes import *  # noqa: F401,F403
 from .ciclos_producoes import *  # noqa: F401,F403
 from .expressoes_producoes import *  # noqa: F401,F403
-
-
-class _TokenStream:
-    # Adaptador simples: o yacc espera um objeto com metodo token().
-    def __init__(self, token_list):
-        self._iterator = iter(token_list)
-
-    def token(self):
-        return next(self._iterator, None)
-
-
-def _trim_trailing_newlines(token_list):
-    # Os NEWLINE no fim do ficheiro nao trazem informacao sintatica.
-    # Se os deixarmos entrar na gramatica final, competem com a regra que
-    # aceita linhas em branco entre subprogramas e criam um conflito
-    # shift/reduce desnecessario.
-    trimmed = list(token_list)
-    while trimmed and trimmed[-1].type == "NEWLINE":
-        trimmed.pop()
-    return trimmed
 
 
 def p_empty(p):
@@ -67,27 +48,18 @@ _parser = yacc.yacc(debug=False, write_tables=False, start=start)
 class FortranParser:
     """PLY YACC parser for the current free-form Fortran subset."""
 
-    def parse(self, tokens, source: str):
+    def parse(self, source: str):
         # Guardamos o texto normalizado para calcular colunas corretas.
         normalized = source.replace("\r\n", "\n").replace("\r", "\n")
-        set_current_source(normalized)
-        token_stream = _TokenStream(_trim_trailing_newlines(tokens))
-        return _parser.parse(input="", lexer=None, tokenfunc=token_stream.token, tracking=True)
+        # O END fecha o programa sem precisar de NEWLINE a seguir.
+        # Remover apenas quebras finais evita uma regra extra para linhas vazias no fim.
+        parser_input = normalized.rstrip("\n")
+        set_current_source(parser_input)
+        lexer = build_lexer()
+        return _parser.parse(parser_input, lexer=lexer, tracking=True)
 
 
 def parse_source(source: str):
-    # Fluxo direto: codigo fonte -> tokens -> AST.
-    normalized = source.replace("\r\n", "\n").replace("\r", "\n")
-    token_list = tokenize_source(normalized)
-    return FortranParser().parse(token_list, normalized)
-
-
-def parse_tokens(tokens, source: str):
-    # Usado quando os tokens ja foram produzidos antes.
-    return FortranParser().parse(tokens, source)
-
-
-def rec_Parser(input_string: str):
-    # Nome mantido por compatibilidade com o estilo do trabalho de Pascal.
-    print("==================COMPILACAO INICIADA==================")
-    return parse_source(input_string)
+    # Fluxo direto: codigo fonte -> AST -> validacao semantica.
+    ast = FortranParser().parse(source)
+    return validate_program(ast)

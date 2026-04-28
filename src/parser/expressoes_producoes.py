@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from .nodes import BinaryOp, Literal, Reference, UnaryOp
-
 
 # A tabela de precedencias ajuda o yacc a decidir como agrupar expressoes.
 precedence = (
@@ -40,7 +38,7 @@ def p_expression_binop(p):
         operator = operator_type
     else:
         operator = p[2]
-    p[0] = BinaryOp(operator=operator, left=p[1], right=p[3])
+    p[0] = ("binary", operator, p[1], p[3])
 
 
 def p_expression_not(p):
@@ -48,7 +46,7 @@ def p_expression_not(p):
     expression : NOT expression
     """
     # NOT e um operador unario logico.
-    p[0] = UnaryOp(operator="NOT", operand=p[2])
+    p[0] = ("unary", "NOT", p[2])
 
 
 def p_expression_uminus(p):
@@ -57,7 +55,7 @@ def p_expression_uminus(p):
                | "+" expression %prec UPLUS
     """
     # Estes sinais sao unarios, por isso usam precedencia propria.
-    p[0] = UnaryOp(operator=p[1], operand=p[2])
+    p[0] = ("unary", p[1], p[2])
 
 
 def p_expression_group(p):
@@ -72,7 +70,7 @@ def p_expression_integer(p):
     expression : INTEGER
     """
     # Literais passam diretamente para o AST.
-    p[0] = Literal(int(p[1]))
+    p[0] = ("literal", int(p[1]))
 
 
 def p_expression_real(p):
@@ -80,14 +78,14 @@ def p_expression_real(p):
     expression : REAL
     """
     # D/d em Fortran corresponde a notacao exponencial real.
-    p[0] = Literal(float(str(p[1]).replace("d", "e").replace("D", "E")))
+    p[0] = ("literal", float(str(p[1]).replace("d", "e").replace("D", "E")))
 
 
 def p_expression_string(p):
     """
     expression : STRING
     """
-    p[0] = Literal(_decode_string(p[1]))
+    p[0] = ("literal", _decode_string(p[1]))
 
 
 def p_expression_true_false(p):
@@ -95,7 +93,7 @@ def p_expression_true_false(p):
     expression : TRUE
                | FALSE
     """
-    p[0] = Literal(p.slice[1].type == "TRUE")
+    p[0] = ("literal", p.slice[1].type == "TRUE")
 
 
 def p_expression_reference(p):
@@ -110,7 +108,7 @@ def p_reference_scalar(p):
     """
     reference : ID
     """
-    p[0] = Reference(name=p[1].upper())
+    p[0] = ("reference", p[1].upper(), [])
 
 
 def p_reference_indexed(p):
@@ -118,7 +116,7 @@ def p_reference_indexed(p):
     reference : ID "(" expression_list_opt ")"
     """
     # Usamos a mesma estrutura para arrays e referencias indexadas.
-    p[0] = Reference(name=p[1].upper(), indices=p[3])
+    p[0] = ("reference", p[1].upper(), p[3])
 
 
 def p_expression_list_single(p):

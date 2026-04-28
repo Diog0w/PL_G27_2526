@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from .nodes import Declaration, VariableSpec
-
 
 def p_type_spec(p):
     """
@@ -19,7 +17,7 @@ def p_declaration(p):
     declaration : type_spec variable_spec_list
     """
     # Uma declaracao junta o tipo e todas as variaveis da linha.
-    p[0] = Declaration(type_name=p[1], variables=p[2])
+    p[0] = ("declaration", p[1], p[2])
 
 
 def p_variable_spec_list_single(p):
@@ -41,7 +39,7 @@ def p_variable_spec_scalar(p):
     variable_spec : ID
     """
     # Variavel simples, sem indices nem dimensoes.
-    p[0] = VariableSpec(name=p[1].upper())
+    p[0] = ("variable", p[1].upper(), [])
 
 
 def p_variable_spec_array(p):
@@ -49,4 +47,4 @@ def p_variable_spec_array(p):
     variable_spec : ID "(" expression_list ")"
     """
     # Array: as dimensoes ficam guardadas como lista de expressoes.
-    p[0] = VariableSpec(name=p[1].upper(), dimensions=p[3])
+    p[0] = ("variable", p[1].upper(), p[3])

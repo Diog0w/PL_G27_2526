@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from .nodes import IfStatement
-
 
 def p_if_statement(p):
     """
@@ -10,7 +8,7 @@ def p_if_statement(p):
     # Aqui tratamos o IF em bloco, nao a forma aritmetica antiga.
     # Neste subset, o fecho do bloco e escrito como ENDIF; a forma END IF
     # pode ser adicionada como uma regra sintatica separada.
-    p[0] = IfStatement(condition=p[3], then_body=p[7], else_body=p[8])
+    p[0] = ("if", p[3], p[7], p[8])
 
 
 def p_else_part(p):

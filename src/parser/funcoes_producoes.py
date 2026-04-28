@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-from .nodes import CallStatement, FunctionUnit, SubroutineUnit
-
 
 def p_function_unit(p):
     """
     function_unit : function_prefix FUNCTION ID parameter_name_list_opt terminator statement_items END
     """
     # Uma FUNCTION pode comecar com um tipo explicito, por exemplo INTEGER FUNCTION.
-    p[0] = FunctionUnit(
-        name=p[3].upper(),
-        parameters=p[4],
-        return_type=p[1],
-        statements=p[6],
-    )
+    p[0] = ("function", p[3].upper(), p[4], p[1], p[6])
 
 
 def p_function_prefix(p):
@@ -30,11 +23,7 @@ def p_subroutine_unit(p):
     subroutine_unit : SUBROUTINE ID parameter_name_list_opt terminator statement_items END
     """
     # SUBROUTINE e uma unidade de programa sem valor de retorno.
-    p[0] = SubroutineUnit(
-        name=p[2].upper(),
-        parameters=p[3],
-        statements=p[5],
-    )
+    p[0] = ("subroutine", p[2].upper(), p[3], p[5])
 
 
 def p_parameter_name_list_opt(p):
@@ -65,7 +54,7 @@ def p_call_statement(p):
     call_statement : CALL ID call_arguments_opt
     """
     # CALL cria um statement com o nome da rotina e os argumentos fornecidos.
-    p[0] = CallStatement(name=p[2].upper(), arguments=p[3])
+    p[0] = ("call", p[2].upper(), p[3])
 
 
 def p_call_arguments_opt(p):

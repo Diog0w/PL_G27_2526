@@ -11,3 +11,7 @@ class FrontendError(Exception):
 
 class ParserError(FrontendError):
     """Raised when syntactic analysis fails."""
+
+
+class SemanticError(Exception):
+    """Raised when semantic analysis fails."""
