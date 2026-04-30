@@ -1,16 +1,23 @@
 def p_if_statement(p):
     """
-    if_statement : IF "(" expression ")" THEN terminator statement_items else_part ENDIF terminator
+    if_statement : IF "(" expression ")" THEN terminator executable_items else_part end_if terminator
     """
     # Aqui tratamos o IF em bloco, nao a forma aritmetica antiga.
-    # Neste subset, o fecho do bloco e escrito como ENDIF; a forma END IF
-    # pode ser adicionada como uma regra sintatica separada.
+    # Aceitamos tanto ENDIF como END IF.
     p[0] = ("if", p[3], p[7], p[8])
+
+
+def p_end_if(p):
+    """
+    end_if : ENDIF
+           | END IF
+    """
+    p[0] = None
 
 
 def p_else_part(p):
     """
-    else_part : ELSE terminator statement_items
+    else_part : ELSE terminator executable_items
               | empty
     """
     # Se nao houver ELSE, devolvemos lista vazia.

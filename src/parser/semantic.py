@@ -16,14 +16,21 @@ class SymbolTable:
     def __init__(self, unit_name: str):
         self.unit_name = unit_name
         self._symbols: dict[str, dict[str, object]] = {}
+        self._next_offset = 0
 
-    def declare(self, name: str, type_name: str, dimensions=None) -> None:
+    def declare(self, name: str, type_name: str, dimensions=None, kind: str = "variable") -> None:
         if name in self._symbols:
             raise SemanticError(f"Identificador '{name}' declarado mais do que uma vez")
+        dimensions = list(dimensions or [])
+        size = _static_size(dimensions)
         self._symbols[name] = {
             "type": type_name,
-            "dimensions": list(dimensions or []),
+            "dimensions": dimensions,
+            "kind": kind,
+            "offset": self._next_offset,
+            "size": size,
         }
+        self._next_offset += size if size is not None else 1
 
     def lookup(self, name: str) -> dict[str, object]:
         symbol = self._symbols.get(name)
@@ -66,6 +73,8 @@ def _collect_subprograms(subprograms):
             if name in functions or name in subroutines:
                 raise SemanticError(f"Subprograma '{name}' declarado mais do que uma vez")
             functions[name] = {
+                "kind": "function",
+                "params": params,
                 "return_type": return_type or INTEGER,
                 "arity": len(params),
             }
@@ -73,7 +82,11 @@ def _collect_subprograms(subprograms):
             _, name, params, _statements = unit
             if name in functions or name in subroutines:
                 raise SemanticError(f"Subprograma '{name}' declarado mais do que uma vez")
-            subroutines[name] = {"arity": len(params)}
+            subroutines[name] = {
+                "kind": "subroutine",
+                "params": params,
+                "arity": len(params),
+            }
         else:
             raise SemanticError(f"Tipo de subprograma desconhecido: {kind}")
 
@@ -89,7 +102,7 @@ def _validate_unit(unit, context) -> None:
         _, name, _params, return_type, statements = unit
         scope = SymbolTable(name)
         # Em Fortran, atribuir ao nome da funcao define o valor de retorno.
-        scope.declare(name, return_type or INTEGER)
+        scope.declare(name, return_type or INTEGER, kind="function_result")
     elif kind == "subroutine":
         _, name, _params, statements = unit
         scope = SymbolTable(name)
@@ -330,3 +343,15 @@ def _expect_compatible(expected: str, actual: str, context: str) -> None:
     if expected == REAL and actual == INTEGER:
         return
     raise SemanticError(f"Tipos incompativeis em {context}: esperado {expected}, obtido {actual}")
+
+
+def _static_size(dimensions) -> int | None:
+    if not dimensions:
+        return 1
+
+    size = 1
+    for dimension in dimensions:
+        if dimension[0] != "literal" or not isinstance(dimension[1], int):
+            return None
+        size *= dimension[1]
+    return size

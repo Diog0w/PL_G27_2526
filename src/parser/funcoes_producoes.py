@@ -1,6 +1,6 @@
 def p_function_unit(p):
     """
-    function_unit : function_prefix FUNCTION ID parameter_name_list_opt terminator statement_items END
+    function_unit : function_prefix FUNCTION ID parameter_name_list_opt terminator program_body END
     """
     # Uma FUNCTION pode comecar com um tipo explicito, por exemplo INTEGER FUNCTION.
     p[0] = ("function", p[3].upper(), p[4], p[1], p[6])
@@ -17,7 +17,7 @@ def p_function_prefix(p):
 
 def p_subroutine_unit(p):
     """
-    subroutine_unit : SUBROUTINE ID parameter_name_list_opt terminator statement_items END
+    subroutine_unit : SUBROUTINE ID parameter_name_list_opt terminator program_body END
     """
     # SUBROUTINE e uma unidade de programa sem valor de retorno.
     p[0] = ("subroutine", p[2].upper(), p[3], p[5])

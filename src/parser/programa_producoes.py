@@ -6,8 +6,7 @@ def p_program_file(p):
     program_file : opt_newlines main_program subprogram_items
     """
     # Estrutura global do ficheiro: programa principal + subprogramas.
-    # Os NEWLINE finais do ficheiro sao removidos antes do parse para evitar
-    # ambiguidade com as linhas em branco entre subprogramas.
+    # Os NEWLINE finais do ficheiro sao removidos antes do parse.
     p[0] = ("program_file", p[2], p[3])
 
 
@@ -53,82 +52,112 @@ def p_subprogram_item_unit(p):
 
 def p_main_program(p):
     """
-    main_program : PROGRAM ID terminator statement_items END
+    main_program : PROGRAM ID terminator program_body END
     """
     # O nome fica normalizado em maiusculas, como o resto dos identificadores.
     p[0] = ("main_program", p[2].upper(), p[4])
 
 
-def p_statement_items_list(p):
+def p_program_body(p):
     """
-    statement_items : statement_items statement_item
+    program_body : declaration_items executable_items
     """
-    # Todos os blocos sao representados como listas simples de statements.
+    # Em Fortran, as declaracoes aparecem antes das instrucoes executaveis.
     p[0] = p[1] + p[2]
 
 
-def p_statement_items_empty(p):
+def p_declaration_items_list(p):
     """
-    statement_items : empty
+    declaration_items : declaration_items declaration_item
+    """
+    p[0] = p[1] + p[2]
+
+
+def p_declaration_items_empty(p):
+    """
+    declaration_items : empty
     """
     p[0] = []
 
 
-def p_statement_item_newline(p):
+def p_declaration_item_newline(p):
     """
-    statement_item : NEWLINE
+    declaration_item : NEWLINE
     """
     p[0] = []
 
 
-def p_statement_item_statement(p):
+def p_declaration_item_statement(p):
     """
-    statement_item : statement
+    declaration_item : opt_label declaration terminator
+    """
+    p[0] = [attach_label(p[2], p[1])]
+
+
+def p_executable_items_list(p):
+    """
+    executable_items : executable_items executable_item
+    """
+    # Todos os blocos executaveis sao representados como listas simples.
+    p[0] = p[1] + p[2]
+
+
+def p_executable_items_empty(p):
+    """
+    executable_items : empty
+    """
+    p[0] = []
+
+
+def p_executable_item_newline(p):
+    """
+    executable_item : NEWLINE
+    """
+    p[0] = []
+
+
+def p_executable_item_statement(p):
+    """
+    executable_item : executable_statement
     """
     p[0] = [p[1]]
 
 
-def p_statement_labeled_line(p):
+def p_executable_statement_labeled_line(p):
     """
-    statement : opt_label declaration terminator
-              | opt_label assignment terminator
-              | opt_label print_statement terminator
-              | opt_label read_statement terminator
-              | opt_label goto_statement terminator
-              | opt_label call_statement terminator
-              | opt_label RETURN terminator
-              | opt_label STOP terminator
+    executable_statement : opt_label assignment terminator
+                         | opt_label print_statement terminator
+                         | opt_label read_statement terminator
+                         | opt_label goto_statement terminator
+                         | opt_label call_statement terminator
+                         | opt_label RETURN terminator
+                         | opt_label STOP terminator
+                         | opt_label CONTINUE terminator
     """
-    # RETURN e STOP nao trazem dados extra, por isso criamos os nos aqui.
+    # RETURN, STOP e CONTINUE nao trazem dados extra, por isso criamos os nos aqui.
     token_type = p.slice[2].type
     if token_type == "RETURN":
         statement = ("return",)
     elif token_type == "STOP":
         statement = ("stop",)
+    elif token_type == "CONTINUE":
+        statement = ("continue",)
     else:
         statement = p[2]
     # Se a linha tiver label, ele fica associado ao statement final.
     p[0] = attach_label(statement, p[1])
 
 
-def p_statement_continue(p):
+def p_executable_statement_if(p):
     """
-    statement : CONTINUE terminator
-    """
-    # CONTINUE costuma surgir como alvo do fecho de um DO com label.
-    p[0] = ("continue", None)
-
-
-def p_statement_if(p):
-    """
-    statement : opt_label if_statement
+    executable_statement : opt_label if_statement
     """
     p[0] = attach_label(p[2], p[1])
 
 
-def p_statement_do(p):
+def p_executable_statement_do(p):
     """
-    statement : opt_label do_statement
+    executable_statement : opt_label do_statement
     """
     p[0] = attach_label(p[2], p[1])
 
