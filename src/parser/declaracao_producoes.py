@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def p_type_spec(p):
     """
     type_spec : INTEGER_TYPE

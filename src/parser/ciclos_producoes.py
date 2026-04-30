@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from .errors import ParserError
 from .shared import token_column
 

@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def p_function_unit(p):
     """
     function_unit : function_prefix FUNCTION ID parameter_name_list_opt terminator statement_items END

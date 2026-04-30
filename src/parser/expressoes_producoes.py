@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 # A tabela de precedencias ajuda o yacc a decidir como agrupar expressoes.
 precedence = (
     ("left", "OR"),

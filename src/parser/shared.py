@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from ..lexer.fortran_analex import find_column
 
 _CURRENT_SOURCE = ""

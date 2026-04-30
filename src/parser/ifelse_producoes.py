@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def p_if_statement(p):
     """
     if_statement : IF "(" expression ")" THEN terminator statement_items else_part ENDIF terminator

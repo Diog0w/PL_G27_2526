@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def p_assignment(p):
     """
     assignment : reference "=" expression

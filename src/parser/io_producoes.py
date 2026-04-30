@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def p_print_statement(p):
     """
     print_statement : PRINT "*" "," print_items_opt
