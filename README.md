@@ -457,6 +457,15 @@ Se o programa estiver correto, e apresentada uma mensagem semelhante a:
 Analise OK: programas_teste/fatorial.f77
 ```
 
+Para visualizar a AST produzida pelo parser, sem gerar codigo VM:
+
+```bash
+python3 -B -c "from pathlib import Path; from pprint import pprint; from src.parser.fortran_anasin import FortranParser; pprint(FortranParser().parse(Path('programas_teste/fatorial.f77').read_text(encoding='utf-8')))"
+```
+
+A AST e apresentada como tuplos e listas Python. Esta opcao e util para
+demonstrar a fase intermedia entre os tokens do lexer e o codigo EWVM final.
+
 Para gerar codigo EWVM no terminal:
 
 ```bash
