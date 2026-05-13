@@ -525,7 +525,7 @@ arrays. As funcoes usam parametros por valor e devolvem o valor no topo da
 stack, enquanto as subrotinas usam argumentos por referencia para permitir que
 alterem variaveis do chamador.
 
-## Limitacoes e trabalho futuro
+## Limitacoes
 
 Apesar de o projeto estar funcional para o subconjunto definido, existem
 limitacoes importantes:
@@ -546,11 +546,6 @@ limitacoes importantes:
 - as subrotinas assumem passagem de argumentos por referencia;
 - em chamadas de subrotinas, os argumentos devem ser referencias modificaveis
   como variaveis ou posicoes de arrays, nao literais ou expressoes temporarias;
-- a validacao dos tipos dos argumentos de funcoes e subrotinas e simples: o
-  compilador valida existencia e numero de argumentos, mas nao faz uma
-  verificacao completa da assinatura por tipo;
-- as funcoes foram implementadas de forma simples, suficiente para os exemplos
-  suportados.
 
 ## Conclusao
 
