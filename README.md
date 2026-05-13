@@ -39,6 +39,9 @@ PL_G27_2526/
 |   +-- primo.f77
 |   +-- conversor.f77
 |   +-- subrotina.f77
+|   +-- tipos_extra.f77
+|   +-- potencia_do_negativos.f77
+|   +-- matriz.f77
 +-- programas_maquina/
 |   +-- hello.out
 |   +-- fatorial.out
@@ -46,6 +49,9 @@ PL_G27_2526/
 |   +-- primo.out
 |   +-- conversor.out
 |   +-- subrotina.out
+|   +-- tipos_extra.out
+|   +-- potencia_do_negativos.out
+|   +-- matriz.out
 +-- src/
 |   +-- compiler_program.py
 |   +-- lexer/
@@ -427,6 +433,11 @@ Foram incluidos os exemplos do enunciado e alguns programas adicionais:
 - `primo.f77`: condicionais, labels, `GOTO`, `MOD`;
 - `conversor.f77`: funcao `CONVRT`;
 - `subrotina.f77`: exemplo simples de `SUBROUTINE` e `CALL`.
+- `tipos_extra.f77`: `REAL`, `CHARACTER`, operadores logicos, `END IF` e
+  `STOP`;
+- `potencia_do_negativos.f77`: potenciacao, menos unario e `DO` com passo
+  negativo;
+- `matriz.f77`: array multidimensional e ciclos `DO` aninhados.
 
 Os ficheiros `.out` correspondentes encontram-se em `programas_maquina/` e podem
 ser copiados diretamente para a EWVM.
