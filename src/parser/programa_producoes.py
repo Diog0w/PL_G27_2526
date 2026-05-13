@@ -80,18 +80,13 @@ def p_declaration_items_empty(p):
     p[0] = []
 
 
-def p_declaration_item_newline(p):
-    """
-    declaration_item : NEWLINE
-    """
-    p[0] = []
-
-
 def p_declaration_item_statement(p):
     """
-    declaration_item : opt_label declaration terminator
+    declaration_item : declaration terminator
     """
-    p[0] = [attach_label(p[2], p[1])]
+    # Labels ficam reservados para instrucoes executaveis. Isto evita
+    # ambiguidades na fronteira entre declaracoes e statements.
+    p[0] = [attach_label(p[1], None)]
 
 
 def p_executable_items_list(p):

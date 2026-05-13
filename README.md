@@ -153,8 +153,7 @@ declaration_items
      | empty
 
 declaration_item
-    -> opt_label declaration terminator
-     | NEWLINE
+    -> declaration terminator
 
 declaration
     -> type_spec variable_spec_list
@@ -169,6 +168,13 @@ variable_spec
     -> ID
      | ID "(" expression_list ")"
 ```
+
+Nesta gramatica, os labels foram reservados para instrucoes executaveis e nao
+para declaracoes. Esta decisao simplifica a fronteira entre o bloco de
+declaracoes e o bloco de instrucoes: quando o parser encontra um label apos as
+declaracoes, sabe que esta a iniciar uma instrucao executavel. Como os labels
+sao usados para `DO`, `CONTINUE` e `GOTO`, e nao para identificar declaracoes,
+esta simplificacao faz sentido dentro do subconjunto free-form suportado.
 
 As instrucoes executaveis suportadas sao:
 
@@ -383,6 +389,34 @@ SUB
 LOADN
 ```
 
+### Decisoes de eficiencia na geracao de codigo
+
+Embora nao tenha sido implementada uma fase autonoma de otimizacao global, a
+geracao de codigo aplica algumas decisoes locais para evitar instrucoes
+redundantes e produzir codigo EWVM mais direto:
+
+- as expressoes sao geradas diretamente em pos-ordem, deixando os resultados na
+  stack e evitando variaveis temporarias intermedias;
+- arrays com tamanho conhecido sao reservados com `PUSHN n`, em vez de emitir
+  uma instrucao de inicializacao para cada posicao;
+- declaracoes nao geram instrucoes durante a execucao, exceto a reserva inicial
+  de memoria necessaria;
+- um `IF` sem `ELSE` gera apenas o salto condicional `JZ` para o fim do bloco,
+  sem criar um `JUMP` adicional desnecessario;
+- conversoes de tipo so sao emitidas quando necessarias, por exemplo `ITOF`
+  apenas quando um inteiro e usado numa operacao real;
+- o gerador escolhe instrucoes especificas conforme o tipo da expressao, como
+  `ADD`/`FADD`, `DIV`/`FDIV` e `INF`/`FINF`, reduzindo conversoes evitaveis;
+- o operador unario `+` nao gera instrucao extra, porque o valor da expressao ja
+  se encontra correto;
+- quando uma funcao ou subrotina ja termina explicitamente com `RETURN`, nao e
+  acrescentado outro `RETURN` implicito;
+- a potenciacao com expoente inteiro literal e gerada como uma sequencia direta
+  de multiplicacoes, evitando uma chamada auxiliar em tempo de execucao.
+
+Estas decisoes nao substituem um otimizador completo, mas melhoram a qualidade
+do codigo VM gerado dentro do subconjunto da linguagem suportado.
+
 ## Programas de teste
 
 Foram incluidos os exemplos do enunciado e alguns programas adicionais:
@@ -500,12 +534,21 @@ limitacoes importantes:
 - nao suporta continuacao de linha com `&`;
 - assume uma instrucao por linha;
 - nao suporta declaracoes com inicializacao direta;
+- nao suporta labels em declaracoes; labels ficam reservados para instrucoes
+  executaveis;
+- linhas vazias dentro do bloco de declaracoes devem ser evitadas, pois uma
+  linha vazia pode marcar a passagem para a zona de instrucoes executaveis;
 - nao suporta `DIMENSION`, `COMMON`, `DATA`, `FORMAT` ou `IMPLICIT`;
 - nao suporta strings como arrays de caracteres;
 - arrays na VM precisam de dimensoes constantes;
 - nao ha verificacao dinamica de limites de arrays;
 - o operador `**` so e gerado para expoentes inteiros literais nao negativos;
 - as subrotinas assumem passagem de argumentos por referencia;
+- em chamadas de subrotinas, os argumentos devem ser referencias modificaveis
+  como variaveis ou posicoes de arrays, nao literais ou expressoes temporarias;
+- a validacao dos tipos dos argumentos de funcoes e subrotinas e simples: o
+  compilador valida existencia e numero de argumentos, mas nao faz uma
+  verificacao completa da assinatura por tipo;
 - as funcoes foram implementadas de forma simples, suficiente para os exemplos
   suportados.
 
