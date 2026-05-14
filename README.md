@@ -1,8 +1,9 @@
+# Compilador Fortran 77 - Projeto PL
+
+###Grupo 27
 - a104266 - Diogo Henrique Costa Ferreira
 - a104355 - Rui Miguel Geraldes Branco da Cruz
 - a104533 - João Pedro Silva de Carvalho
-  
-# Compilador Fortran 77 - Projeto PL
 
 ## Introducao
 
